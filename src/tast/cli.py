@@ -67,11 +67,6 @@ def build_parser() -> argparse.ArgumentParser:
     out = p.add_argument_group("plot")
     out.add_argument("--format", choices=["png", "pdf", "svg"], default="png", help="plot file type (default: png)")
     out.add_argument("--dpi", type=int, default=140, help="PNG resolution (default: 140)")
-    out.add_argument("--numbering", choices=["transcript", "genome"], default="transcript",
-                     help="how alignment regions are numbered on the plot. transcript: by position in the "
-                          "transcript (0 = nearest the 5' end), so reverse-strand genes read ...2 1 0 and "
-                          "rearrangements show as out-of-order numbers; genome: the order of TAST 1.0 "
-                          "(default: transcript)")
     out.add_argument("--min-gap", type=int, default=0, metavar="BP",
                      help="minimum distance between transcripts sharing a plot row (default: 0)")
     out.add_argument("--no-row-numbers", action="store_true", help="do not number the plot rows")
@@ -145,8 +140,7 @@ def _run(args, log, started) -> int:
 
     #---- analysis
     settings = Settings(max_intron=args.max_intron, min_coverage=args.min_coverage, strand=args.strand,
-                        barcode_len=args.barcode_len, min_orf_len=args.min_orf_len, min_gap=args.min_gap,
-                        numbering=args.numbering)
+                        barcode_len=args.barcode_len, min_orf_len=args.min_orf_len, min_gap=args.min_gap)
     result = run(blast, args.transcripts, out / "filtered_transcripts.fasta", settings, log=log)
     n_plotted = sum(len(r.transcripts) for r in result.rows)
     log(f"{n_plotted} transcripts arranged in {len(result.rows)} plot rows")

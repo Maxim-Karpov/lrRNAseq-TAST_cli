@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import heapq
-from typing import Dict, List, Sequence, Tuple
+from typing import List, Sequence, Tuple
 
 
 def pack_rows(starts: Sequence[int], ends: Sequence[int], min_gap: int = 0) -> List[List[int]]:
@@ -26,33 +26,17 @@ def pack_rows(starts: Sequence[int], ends: Sequence[int], min_gap: int = 0) -> L
     return rows
 
 
-NUMBERING_MODES = ("transcript", "genome")
+def region_labels(qstarts: Sequence[int]) -> List[int]:
+    """Number the alignment regions of one transcript by their position in the transcript.
+    `qstarts` are the transcript start positions of the regions, given in genomic order.
 
-
-def region_labels(qstarts: Sequence[int], numbering: str = "transcript") -> List[int]:
-    """Number the alignment regions of one transcript. `qstarts` are the transcript start
-    positions of its regions, given in genomic order.
-
-    transcript - each region is numbered by its position in the transcript: 0 is the region
-                 nearest the transcript's 5' end. Along the genome the numbers read 0, 1, 2 ...
-                 for a gene on the forward strand, ... 2, 1, 0 for a gene on the reverse strand,
-                 and out of order where parts of the transcript are rearranged.
-    genome     - regions are numbered in the order their qstart is first met along the genome
-                 (numbering of the original TAST notebook, version 1.0).
-
-    In both modes, regions with the same qstart (the same part of the transcript aligned in
-    several places) share a number.
+    0 is the region nearest the transcript's 5' end, so along the genome the numbers read
+    0, 1, 2 ... for a gene on the forward strand, ... 2, 1, 0 for a gene on the reverse strand,
+    and out of order where parts of the transcript are rearranged. Regions with the same qstart
+    (the same part of the transcript aligned in several places) share a number.
     """
-    if numbering == "transcript":
-        rank = {q: i for i, q in enumerate(sorted(set(qstarts)))}
-        return [rank[q] for q in qstarts]
-    if numbering == "genome":
-        numbers: Dict[int, int] = {}
-        for q in qstarts:
-            if q not in numbers:
-                numbers[q] = len(numbers)
-        return [numbers[q] for q in qstarts]
-    raise ValueError(f"numbering must be one of {NUMBERING_MODES}")
+    rank = {q: i for i, q in enumerate(sorted(set(qstarts)))}
+    return [rank[q] for q in qstarts]
 
 
 def colinear_runs(labels: Sequence[int]) -> List[Tuple[int, int, int]]:
@@ -85,25 +69,6 @@ def region_order(labels: Sequence[int]) -> str:
     if len(runs) == 1:
         return "forward" if runs[0][2] == 1 else "reverse"
     return "mixed"
-
-
-def syntenic_runs(labels: Sequence[int]) -> List[int]:
-    """Boundaries of runs of non-decreasing region numbers (as in the original notebook, used
-    with numbering="genome").
-    Consecutive pairs of the returned indices mark the first and last region of a run."""
-    structure = []
-    start = 1
-    for i in range(len(labels) - 1):
-        if labels[i + 1] >= labels[i] and start != -1:
-            start = -1
-            structure.append(i)
-        elif labels[i + 1] < labels[i]:
-            structure.append(i)
-            start = 1
-    structure.append(len(labels) - 1)
-    if len(structure) % 2 != 0:
-        structure.append(structure[-1])
-    return structure
 
 
 def spread_positions(positions: Sequence[int], spacing: int = 250) -> List[int]:

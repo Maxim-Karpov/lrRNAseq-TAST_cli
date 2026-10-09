@@ -123,7 +123,6 @@ The numbering assumes transcripts are oriented 5'→3', as full-length (FLNC/CCS
 | `--blast-options` | | Any other blastn options, in quotes. |
 | `--format` | `png` | `png`, `pdf` or `svg`. Use pdf or svg for very large plots. |
 | `--dpi` | `140` | PNG resolution. |
-| `--numbering` | `transcript` | How regions are numbered. `transcript` uses each region's position in the transcript (see above). `genome` uses the order of the first appearance along the genome, as TAST 1.0 did. |
 | `--min-gap` | `0` | Minimum distance in bp between transcripts sharing a row. |
 | `--no-row-numbers` | | Don't number the rows. |
 | `-q`, `--quiet` | | Only print warnings and errors. |
@@ -145,7 +144,7 @@ MIT. See [LICENSE](LICENSE).
 
 ## Notebook version
 
-lrRNAseq TAST is also available as a set of Jupyter notebooks: [lrRNAseq-TAST](https://github.com/Maxim-Karpov/lrRNAseq-TAST). Both versions perform the same analysis. The notebook version has these benefits:
+lrRNAseq TAST is also available as a set of Jupyter notebooks: [lrRNAseq-TAST](https://github.com/Maxim-Karpov/lrRNAseq-TAST). Both versions perform the same analysis and, with the same settings, give identical results. The notebook version has these benefits:
 
 - **Step-by-step and interactive.** Each stage of the analysis is a separate cell, so you can stop at any point and inspect the intermediate tables (the BLAST alignments, transcript coverage and intron lengths, ORFs, and the arrangement of transcripts into rows). This is useful for understanding the results for a difficult region, or for troubleshooting.
 - **Easy to customise.** Any step can be edited in place: add your own filter, change how the plot is drawn, or try a new idea, without changing a packaged program.
@@ -154,9 +153,3 @@ lrRNAseq TAST is also available as a set of Jupyter notebooks: [lrRNAseq-TAST](h
 - **A library of extra sequence-analysis functions** (`bioinformatic_functions.ipynb`), such as ORF statistics, poly(A) tail detection, translation and k-mer counting, which can be used for wider analyses.
 
 Use the command-line tool for routine runs, many genomic regions, or reproducible results; use the notebooks to explore a region in depth or to develop new filters.
-
-With `--numbering genome` and matching settings, this tool reproduces the notebook's results exactly: on the example data the transcripts, alignment regions, ORF highlights and region numbers are identical, and the plots match pixel for pixel. The differences are:
-
-- By default, regions are numbered by their position in the transcript and colinear blocks are coloured by direction, which shows reverse-strand genes and rearrangements. The notebook numbers regions in the order they first appear along the genome.
-- Rows are numbered on the plot (turn off with `--no-row-numbers`).
-- Rows of exactly equal width are placed in a fixed order (by total alignment length, then start position); in the notebook their order can depend on the computer's numpy version.

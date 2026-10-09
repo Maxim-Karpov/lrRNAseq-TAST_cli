@@ -24,13 +24,12 @@ def blast():
 
 
 @pytest.mark.parametrize("strand", ["dominant", "both"])
-@pytest.mark.parametrize("numbering", ["genome", "transcript"])
-def test_rows_match_expected(blast, strand, numbering, tmp_path):
-    #with numbering="genome" the rows are identical to the original notebook
-    settings = Settings(strand=strand, barcode_len=39, numbering=numbering)
+def test_rows_match_expected(blast, strand, tmp_path):
+    #the rows are identical to those of lrRNAseq_TAST_visualiser.ipynb with the same settings
+    settings = Settings(strand=strand, barcode_len=39)
     res = run(blast, TRANSCRIPTS, tmp_path / "f.fasta", settings, log=lambda m: None)
     rows = json.loads(json.dumps([dataclasses.asdict(r) for r in res.rows], default=int))
-    assert rows == EXPECTED[f"{strand}_{numbering}"]
+    assert rows == EXPECTED[strand]
 
 
 def test_transcript_numbering_follows_strand(blast, tmp_path):

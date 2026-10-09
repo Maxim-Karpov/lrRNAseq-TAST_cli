@@ -9,7 +9,7 @@ import pandas as pd
 
 from .filters import apply_filters, choose_strand, merge_intervals, transcript_stats
 from .files import InputError, subset_fasta
-from .layout import colinear_runs, pack_rows, region_labels, region_order, spread_positions, syntenic_runs
+from .layout import colinear_runs, pack_rows, region_labels, region_order, spread_positions
 from .orfs import find_orfs
 
 
@@ -21,7 +21,6 @@ class Settings:
     barcode_len: int = 0
     min_orf_len: int = 26
     min_gap: int = 0
-    numbering: str = "transcript"
 
 
 @dataclass
@@ -35,7 +34,7 @@ class Row:
     labels: List[int]               #region numbers drawn on the plot
     label_x: List[int]              #x positions of the numbers
     frames: List[List[int]]         #genomic [start, end] of colinear blocks of regions
-    frame_directions: List[int]     #1 forward, -1 reverse, 0 single region (always 1 with numbering="genome")
+    frame_directions: List[int]     #1 forward, -1 reverse, 0 single region
 
 
 @dataclass
@@ -128,7 +127,7 @@ def run(blast: pd.DataFrame, transcripts_fasta: Path, filtered_fasta_out: Path,
             "qseqid": tid, "start": start, "end": end, "TrLen": end - start, "regions": regions,
             "in_orf": [any(_overlaps(q, o) for o in orf_blocks) for q in qranges],
             "in_largest_orf": [_overlaps(q, largest[tid]) for q in qranges],
-            "labels": region_labels([q[0] for q in qranges], settings.numbering),
+            "labels": region_labels([q[0] for q in qranges]),
         })
     models = pd.DataFrame(models).sort_values(by=["start", "end"]).reset_index(drop=True)
 
@@ -152,12 +151,7 @@ def run(blast: pd.DataFrame, transcripts_fasta: Path, filtered_fasta_out: Path,
         regions = [r for rs in sub["regions"] for r in rs]
         frames, directions, offset = [], [], 0
         for rs, labels in zip(sub["regions"], sub["labels"]):
-            if settings.numbering == "genome":
-                runs = syntenic_runs(labels)
-                runs = [(runs[i], runs[i + 1], 1) for i in range(0, len(runs) - 1, 2)]
-            else:
-                runs = colinear_runs(labels)
-            for first, last, direction in runs:
+            for first, last, direction in colinear_runs(labels):
                 frames.append([regions[first + offset][0], regions[last + offset][1]])
                 directions.append(direction)
             offset += len(rs)

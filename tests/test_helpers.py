@@ -1,7 +1,7 @@
 import pandas as pd
 
 from tast.filters import choose_strand, merge_intervals, transcript_stats
-from tast.layout import colinear_runs, pack_rows, region_labels, region_order, spread_positions, syntenic_runs
+from tast.layout import colinear_runs, pack_rows, region_labels, region_order, spread_positions
 from tast.orfs import find_orfs
 
 
@@ -23,11 +23,6 @@ def test_find_orfs_lowercase():
     assert find_orfs("ccatgaaatagg", 0) == find_orfs("CCATGAAATAGG", 0)
 
 
-def test_region_labels_genome_order():
-    assert region_labels([500, 10, 300], "genome") == [0, 1, 2]
-    assert region_labels([500, 10, 500, 20], "genome") == [0, 1, 0, 2]
-
-
 def test_region_labels_transcript_position():
     assert region_labels([10, 300, 500]) == [0, 1, 2]          #forward strand gene
     assert region_labels([500, 300, 10]) == [2, 1, 0]          #reverse strand gene
@@ -45,12 +40,6 @@ def test_colinear_runs_and_order():
     assert region_order([2, 1, 0]) == "reverse"
     assert region_order([0, 1, 4, 5, 2, 3]) == "mixed"
     assert region_order([0]) == "single"
-
-
-def test_syntenic_runs_even_length():
-    assert syntenic_runs([0]) == [0, 0]
-    assert syntenic_runs([0, 1, 2, 0, 3]) == [0, 2, 3, 4]
-    assert len(syntenic_runs([0, 1, 0, 2, 1])) % 2 == 0
 
 
 def test_spread_positions_does_not_modify_input():

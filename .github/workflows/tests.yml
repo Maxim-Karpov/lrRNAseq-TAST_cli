@@ -1,0 +1,26 @@
+name: tests
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ["3.9", "3.13"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install BLAST+ (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y ncbi-blast+
+      - name: Install TAST
+        run: pip install .[test]
+      - name: Run tests
+        run: pytest -v
+      - name: Run the command on the example data
+        run: tast -t example/all_transcripts.fasta -g example/Ef318A10.fst -b example/lrRNAseq_to_Ef318A10.out --barcode-len 39 -o example_results
